@@ -5,9 +5,8 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
+	"go.servertracker.net/agent/log"
 )
 
 // startCmd represents the start command
@@ -15,7 +14,7 @@ var startCmd = &cobra.Command{
 	Use:   "start",
 	Short: "Start the agent",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("start called")
+		log.Log("Starting agent", log.INFO)
 	},
 }
 

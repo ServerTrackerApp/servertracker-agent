@@ -7,6 +7,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/viper"
+	"go.servertracker.net/agent/log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -49,7 +50,7 @@ func initConfig() {
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		log.Log(fmt.Sprintf("Using config file: %s", viper.ConfigFileUsed()), log.INFO)
 	}
 
 	if _, err := os.Stat(viper.ConfigFileUsed()); os.IsNotExist(err) {
