@@ -5,13 +5,12 @@
 package datastore
 
 import (
-	"encoding/json"
 	"sync"
 )
 
 type DataStore struct {
 	sync.RWMutex
-	store map[string]json.RawMessage
+	store map[string]any
 }
 
 var instance *DataStore
@@ -20,19 +19,19 @@ var once sync.Once
 func GetInstance() *DataStore {
 	once.Do(func() {
 		instance = &DataStore{
-			store: make(map[string]json.RawMessage),
+			store: make(map[string]any),
 		}
 	})
 	return instance
 }
 
-func (ds *DataStore) Set(key string, value json.RawMessage) {
+func (ds *DataStore) Set(key string, value any) {
 	ds.Lock()
 	defer ds.Unlock()
 	ds.store[key] = value
 }
 
-func (ds *DataStore) Get(key string) (json.RawMessage, bool) {
+func (ds *DataStore) Get(key string) (any, bool) {
 	ds.RLock()
 	defer ds.RUnlock()
 	value, ok := ds.store[key]
