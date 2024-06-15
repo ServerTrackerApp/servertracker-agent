@@ -17,6 +17,7 @@ var startCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Log("Starting agent", log.INFO)
 		plugin.LoadPlugins()
+		plugin.StartPlugins()
 	},
 }
 

@@ -7,10 +7,12 @@ package plugin
 import (
 	"fmt"
 	"go.servertracker.net/agent/config"
+	"go.servertracker.net/agent/datastore"
 	"go.servertracker.net/agent/log"
 	"os"
 	"path/filepath"
 	"plugin"
+	"sync"
 )
 
 var (
@@ -19,7 +21,7 @@ var (
 
 type Plugin interface {
 	Name() string
-	Init(settings config.PluginSettings) error
+	Init(settings config.PluginSettings, ds *datastore.DataStore) error
 	Run() error
 	Exit() error
 }
@@ -67,18 +69,30 @@ func LoadPlugins() {
 		}
 
 		settings, _ := config.GetPluginSettings(plug.Name())
-		err = plug.Init(settings)
+		err = plug.Init(settings, datastore.GetInstance())
 		if err != nil {
 			log.Log(fmt.Sprintf("Failed to initialize plugin: %s", err), log.ERROR)
 			continue
 		}
 
-		err = plug.Run()
-		if err != nil {
-			log.Log(fmt.Sprintf("Failed to run plugin: %s", err), log.ERROR)
-			continue
-		}
-
 		Plugins[plug.Name()] = plug
 	}
+}
+
+func StartPlugins() {
+	var wg sync.WaitGroup
+
+	for _, plug := range Plugins {
+		log.Log(fmt.Sprintf("Starting plugin: %s", plug.Name()), log.INFO)
+		wg.Add(1)
+		go func(plug Plugin) {
+			defer wg.Done()
+			err := plug.Run()
+			if err != nil {
+				log.Log(fmt.Sprintf("Failed to run plugin: %s", err), log.ERROR)
+			}
+		}(plug)
+	}
+
+	wg.Wait()
 }
