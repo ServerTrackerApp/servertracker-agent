@@ -96,3 +96,11 @@ func StartPlugins() {
 
 	wg.Wait()
 }
+
+func GetPluginList() []string {
+	var pluginList []string
+	for name := range Plugins {
+		pluginList = append(pluginList, name)
+	}
+	return pluginList
+}
