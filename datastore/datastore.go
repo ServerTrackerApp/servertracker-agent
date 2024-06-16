@@ -8,12 +8,18 @@ import (
 	"bytes"
 	"encoding/gob"
 	"sync"
+	"time"
 )
 
 type DataStore struct {
 	sync.RWMutex
 	store   map[string]any
 	plugins map[string][]any
+}
+
+type TimedData struct {
+	Timestamp time.Time `json:"timestamp"`
+	Data      any       `json:"data"`
 }
 
 var instance *DataStore
@@ -85,6 +91,15 @@ func (ds *DataStore) PushPluginData(pluginName string, data any) {
 	ds.Lock()
 	defer ds.Unlock()
 	ds.plugins[pluginName] = append(ds.plugins[pluginName], data)
+}
+
+func (ds *DataStore) PushTimedPluginData(pluginName string, data any) {
+	ds.Lock()
+	defer ds.Unlock()
+	ds.plugins[pluginName] = append(ds.plugins[pluginName], TimedData{
+		Timestamp: time.Now(),
+		Data:      data,
+	})
 }
 
 func (ds *DataStore) GetPluginData(pluginName string) ([]any, bool) {
